@@ -1,0 +1,333 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<HEAD>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<TITLE> Keymaster </TITLE>
+<script>
+
+var sets = new Array();
+sets[0] = "abcdefghijklmnopqrstuvwxyz";
+sets[1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+sets[2] = "0123456789";
+sets[3] = "`~!@#$%^&*()-=_+[]{}|;:,./<>?'\"";
+localStorage.specChar=[];
+
+function copyField(id) {
+	document.getElementById(id).classList.remove("copy");
+	var copyText = document.getElementById(id);
+	copyText.select(); 
+	copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+	document.execCommand("copy");
+	document.getElementById(id).classList.add("copy");  
+}
+
+function swapChar(s,c,o){
+	if ( document.getElementById("charset").checked !== true && s == 3 ){
+			s = 0;
+	}
+	let useSet = sets[s];
+	if ( s == 3 ){
+		useSet = filterSpecChars();
+	}
+	c = c.toLowerCase();
+	var l = sets[0].indexOf(c);
+	var rc = useSet.charAt((l+o)%useSet.length);
+	return rc;
+}
+
+function filterSpecChars(){
+	tempSet = "";
+	let settings = document.getElementById("specialChars").getElementsByTagName("input");
+	for ( var i in settings ){
+		if ( settings[i].checked === true ){
+			tempSet += sets[3][settings[i].value];
+		}
+	}
+	return tempSet;
+}
+
+function makePassword2020() {
+	var site = document.getElementById("site").value;
+	var pin = document.getElementById("pin").value;
+	var length = document.getElementById("length").value;
+	if ( site == "" || pin == "" || length == "" ){ return; }
+	document.getElementById("output").value = passAlgo(site,pin,length);
+}
+
+function passAlgo(site,pin,length){
+  var o = parseInt(pin) * 16807 % 2147483647;
+  var output = "";  
+  var r = 0;
+  for ( var t = 0; t < site.length; t++ ){
+    r += site.charCodeAt(t);
+  }
+  
+  for (var i = 0; i < length; i++) {
+    var c = site.charAt((i+r) % site.length);
+    var s = ( pin + i ) % sets.length;
+    var nc = swapChar(s, c, o, r);
+    var t = 0;
+    // impossible to avoid duplicates with larger passwords
+    // so we set a maximum number of attempts to find alternate
+    // to avoid infinite loop.
+    while (output.indexOf(nc) != -1 && t <= 26) {
+      o = (o + 1);
+      nc = swapChar(s, c, o);
+      t++;
+    }
+    output += swapChar(s, c, o);
+  }
+  // shuffle the password for extra pseudo randomness
+  var shuffle = (pin).toString();
+  for (var a = 0; a < shuffle.length; a++) {
+    var p = parseInt(shuffle[a]);
+    if (p > output.length) {
+      p = p - output.length;
+    }
+    if (p != 0) {
+      output = shuffleString(output, p);
+    }
+  }
+  return output;
+}
+
+
+
+function shuffleString(s,x){
+	var left = s.substring(0,x);
+	var right = s.substring(x);
+	return right + left;
+}
+
+
+function setVal(i,c,f,v){
+	var all = document.getElementsByClassName(c);
+	for ( x = 0 ; x < all.length ; x++ ) {
+		all[x].className = c;
+	}
+	document.getElementById(i).className = c+" active";
+	document.getElementById(f).value = v;
+	makePassword2020();
+}
+
+if (window.applicationCache) {
+	applicationCache.addEventListener('updateready', function() {
+		if (confirm('An update is available. Reload now?')) {
+			window.location.reload();
+		}
+	});
+}
+
+function populateSpecChars(){
+	for ( var i in sets[3] ){
+		var c = document.createElement("input");
+			c.type = "checkbox";
+			c.setAttribute("class","charOpts");
+			c.value = i;
+			c.checked = "checked";
+			c.setAttribute("onclick","makePassword2020();");
+			c.id = "specChar"+i;
+		document.getElementById("specialChars").appendChild(c);
+		var l = document.createElement("label");
+			l.setAttribute("for","specChar"+i);
+			l.innerHTML = sets[3][i];
+		document.getElementById("specialChars").appendChild(l);
+	}
+}
+function showTab(x){
+	document.getElementById("tab1").style.display="none";
+	document.getElementById("tab2").style.display="none";
+	document.getElementById("tab"+x).style.display="block";
+	document.getElementById("header1").classList.remove("active");
+	document.getElementById("header2").classList.remove("active");
+	document.getElementById("header"+x).classList.add("active");
+}
+
+function saveOptions(){
+	let settings = document.getElementById("specialChars").getElementsByTagName("input");
+	for ( var i in settings ){
+		localStorage.setItem(settings[i].id,settings[i].checked);
+	}
+}
+function loadOptions(){
+	let settings = document.getElementById("specialChars").getElementsByTagName("input");
+	for ( var i in settings ){
+		if ( localStorage[settings[i].id] && typeof(localStorage[settings[i].id]) != "undefined" ){
+			if ( document.getElementById(settings[i].id) && localStorage[settings[i].id] == "false" ){
+				document.getElementById(settings[i].id).checked = false
+			}
+		}
+	}
+}
+</script>
+<style>
+body {
+	background-color: #999;
+	font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+	color: #333333;
+	font-size: 16px;
+	line-height: 24px;
+}
+#container {
+	background-color: #eee;
+	display: block;
+	width: 375px;
+	border: 2px solid #000;
+	border-radius: 10px;
+	padding: 10px;
+	position: absolute;
+	left: 50%;
+	top: 1%;
+	margin-left: -177px;
+	box-shadow: #aaa 0px 0px 10px 10px;
+}
+@media only screen and (max-device-width: 400px) {
+	#container {
+		width: 96%;
+		box-shadow: none;
+		border-color: transparent;
+	}
+}
+
+#container h1, h5 {
+	text-align: center;
+	margin: 4px 0;
+}
+
+
+#container #generate label {
+	display: inline-block;
+	width: 30%;
+}
+#container #generate input[type=text],
+#container #generate input[type=number] {
+	display:inline-block;
+	width: 60%;
+	font-size: 16px;
+	margin: 8px 0;
+	border-radius: 2px;
+}
+#container #generate input[type=checkbox]{
+	display: none;
+}
+#container #generate label[for=charset]{
+	display: block;
+	float: right;
+	clear: both;
+	width: auto	;
+	text-align: right;
+	background-color: #666;
+	color: #333;
+	padding: 4px 10px;
+	border-radius: 10px;
+	border: 2px solid #000;
+}
+#container #generate input[type=checkbox]:checked + label {
+	background-color: lightgreen;
+	color: #000;
+	border-color: #666;
+}
+
+#container #generate input[type=checkbox]:checked + label:after {
+	content:": ON";
+	margin: 0 4px 0 10px;
+}
+#container #generate input[type=checkbox] + label:after {
+	content:": OFF";
+	margin: 0 4px 0 10px;
+}
+
+#container #generate button {
+	display:block;
+	width: 98%;
+	padding: 4px 10px;
+	border-radius: 10px;
+	border: 2px solid #666;
+	margin: 20px 1%;
+	font-size: 16px;
+	color: #000;
+	background-color: lightblue;
+}
+#container #generate button:active {
+	color: lightblue;
+	background-color: #fff;
+}
+
+#container #config input[type=checkbox]{
+	display: none;
+}
+#container #config label {
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+	background-color: #666;
+	color: #999;
+	font-size: 24px;
+	line-height: 28px;
+	margin: 2px 4px;
+	text-align: center;
+	border-radius: 2px;
+	border: 2px solid #012D38;
+}
+#container #config input[type=checkbox]:checked + label {
+	background-color: lightgreen;
+	color: #000;
+	border-color: #666;
+}
+#container #generate input[type=text],
+#container #generate input[type=number]{
+	color: #000;
+	border: 2px solid #666;
+	background-color: transparent;
+	padding: 4px 8px;
+}
+#container #generate #output {
+	background-color: transparent;
+	border-color: transparent;
+	color: #000;
+	font-weight: 500;
+	text-align: left;
+}
+
+#container #config h3 {
+	margin-bottom: 0;
+}
+
+</style>
+</HEAD>
+<BODY onload="populateSpecChars();loadOptions();" onunload="saveOptions();">
+	<div id="container">
+		<h1>Keymaster</h1>
+		<h5>A pseudo-random password generator.</h5>
+		<div id="generate">
+			<label for="length">Length</label>
+			<input type="number" size=24 id="length" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
+			<br/>
+			<label for="pin">PIN Code</label>
+			<input type="number" size=24 id="pin" value="0000" onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
+			<br/>
+			<label for="site">Site Name</label>
+			<input type="text" size=24 id="site" onkeyup="makePassword2020();">
+			<br/>
+			<label for="output">Password</label>
+			<input type="text" size=24 id="output" readonly>
+			<br/>
+			<input type="checkbox" id="charset" checked=true onclick="makePassword2020();">
+			<label for="charset">Include Special Characters</label>
+			<br/>
+			<button onclick="copyField('output');">Copy to Clipboard</button>
+		</div>
+		<div id="config">
+			<hr/>
+			<h3>Special Character Set</h3>
+			<i>Click character to toggle.</i>
+			<div id="specialChars"></div>
+		</div>
+		<div id="about">
+			<hr/>
+			About Keymaster.
+			<p>Rather than store your passwords, Keymaster allows you to consistently generate pseudo-random passwords given a site name, pin code and password length.</p>
+		</div>
+	</div>
+</BODY >
+</HTML>
