@@ -14,5 +14,5 @@ In addition to the new algorhythm, Keymaster also allows for the disabling or en
 Demo:
 https://madmonk13.github.io/keymaster/
 
-#todo
+# todo
 I'm not in love with the color scheme, maybe do something about that.
