@@ -11,7 +11,28 @@ I eventually came to the conclusion that the passgen algorhythm was not nearly "
 
 In addition to the new algorhythm, Keymaster also allows for the disabling or enabling of specific special characters in passwords and choices are saved in html5 webstorage.
 
-Demo:
+# Example usage:
+Step 1:
+
+Provide the desired password length, a PIN number of your choice and a name for the site.
+
+
+Step 2:
+
+Copy your password.
+
+
+Advanced usage:
+
+1. Every choice you make will alter the resulting password.  Even disabling a special character not in your current password will yield a different result.  Even if someone knows your PIN code, if you've disabled and characters they will not be able to generate your password.
+
+2. Capitalization will also change the result.  Use upper case in unusual places for extra security.
+
+3. Pad the site name.  For example, instead of "amazon", try "!amazon".
+
+Just remember, this is intended to make complicated passwords easy.  Don't over do it with these methods.  Whatever you decided to do, make sure you can remember to do it every time.
+
+# Demo:
 https://madmonk13.github.io/keymaster/
 
 # todo
