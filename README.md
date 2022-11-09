@@ -13,7 +13,7 @@ In addition to the new algorhythm, Keymaster also allows for the disabling or en
 
 # Advanced usage:
 
-1. Every choice you make will alter the resulting password.  Even disabling a special character not in your current password will yield a different result.  Even if someone knows your PIN code, if you've disabled and characters they will not be able to generate your password.
+1. Every choice you make will alter the resulting password.  Even disabling a special character not in your current password will yield a different result.  Even if someone knows your PIN code, if you've disabled any characters they will not be able to generate your password without knowing what you've disabled.
 
 2. Capitalization will also change the result.  Use upper case in unusual places for extra security.
 
