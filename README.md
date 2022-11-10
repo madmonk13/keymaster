@@ -19,7 +19,7 @@ In addition to the new algorhythm, Keymaster also allows for the disabling or en
 
 3. Pad the site name.  For example, instead of "amazon", try "!amazon".
 
-Just remember, this is intended to make complicated passwords easy.  Don't over do it with these methods.  Whatever you decided to do, make sure you can remember to do it every time.
+Just remember, this is intended to make complicated passwords easy.  Don't over do it with these methods.  Whatever you decide to do, make sure you can remember to do it every time.
 
 # Demo:
 https://madmonk13.github.io/keymaster/
