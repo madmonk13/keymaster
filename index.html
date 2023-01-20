@@ -1,11 +1,13 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
 <HEAD>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <TITLE> Keymaster </TITLE>
 <script>
+let tabs = ['generate','config','about','importExport'];
+let activeTab = 0;
 
-var sets = new Array();
+let sets = new Array();
 sets[0] = "abcdefghijklmnopqrstuvwxyz";
 sets[1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 sets[2] = "0123456789";
@@ -14,7 +16,7 @@ localStorage.specChar=[];
 
 function copyField(id) {
 	document.getElementById(id).classList.remove("copy");
-	var copyText = document.getElementById(id);
+	let copyText = document.getElementById(id);
 	copyText.select(); 
 	copyText.setSelectionRange(0, 99999); /*For mobile devices*/
 	document.execCommand("copy");
@@ -30,15 +32,15 @@ function swapChar(s,c,o){
 		useSet = filterSpecChars();
 	}
 	c = c.toLowerCase();
-	var l = sets[0].indexOf(c);
-	var rc = useSet.charAt((l+o)%useSet.length);
+	let l = sets[0].indexOf(c);
+	let rc = useSet.charAt((l+o)%useSet.length);
 	return rc;
 }
 
 function filterSpecChars(){
 	tempSet = "";
 	let settings = document.getElementById("specialChars").getElementsByTagName("input");
-	for ( var i in settings ){
+	for ( let i in settings ){
 		if ( settings[i].checked === true ){
 			tempSet += sets[3][settings[i].value];
 		}
@@ -46,27 +48,57 @@ function filterSpecChars(){
 	return tempSet;
 }
 
+function totalASCII(string){
+	let total = 0;
+	for ( let i = 0; i < string.length; i++ ){
+		total += string.charCodeAt(i);
+	}
+	return parseInt(total);
+}
+
 function makePassword2020() {
-	var site = document.getElementById("site").value;
-	var pin = document.getElementById("pin").value;
-	var length = document.getElementById("length").value;
+	getSettings();
+	let length = 0;
+	let site = document.getElementById("site").value;
+	let pin = document.getElementById("pin").value;
+	if ( document.getElementById("length").value == document.getElementById("length2").value ){
+		length = document.getElementById("length").value;
+	}
+	else {
+		let minLength = parseInt(document.getElementById("length").value);
+		let maxLength = parseInt(document.getElementById("length2").value);
+		if ( maxLength < minLength ){
+			document.getElementById("length2").value = minLength;
+			return;
+		}
+		else {
+			let val = totalASCII(site+pin);
+			let addLength = val%((maxLength-minLength)+1);
+			length = minLength + addLength;
+			while ( length > maxLength && length < minLength ){
+				length += minLength;
+				length = length%maxLength;
+			}
+		}
+	}
 	if ( site == "" || pin == "" || length == "" ){ return; }
 	document.getElementById("output").value = passAlgo(site,pin,length);
 }
 
 function passAlgo(site,pin,length){
-  var o = parseInt(pin) * 16807 % 2147483647;
-  var output = "";  
-  var r = 0;
-  for ( var t = 0; t < site.length; t++ ){
+  let o = parseInt(pin) + totalASCII(site) + parseInt(length);
+//   let o = parseInt(pin) * 16807 % 2147483647;
+  let output = "";  
+  let r = 0;
+  for ( let t = 0; t < site.length; t++ ){
     r += site.charCodeAt(t);
   }
   
-  for (var i = 0; i < length; i++) {
-    var c = site.charAt((i+r) % site.length);
-    var s = ( pin + i ) % sets.length;
-    var nc = swapChar(s, c, o, r);
-    var t = 0;
+  for (let i = 0; i < length; i++) {
+    let c = site.charAt((i+r) % site.length);
+    let s = ( pin + i ) % sets.length;
+    let nc = swapChar(s, c, o, r);
+    let t = 0;
     // impossible to avoid duplicates with larger passwords
     // so we set a maximum number of attempts to find alternate
     // to avoid infinite loop.
@@ -78,9 +110,9 @@ function passAlgo(site,pin,length){
     output += swapChar(s, c, o);
   }
   // shuffle the password for extra pseudo randomness
-  var shuffle = (pin).toString();
-  for (var a = 0; a < shuffle.length; a++) {
-    var p = parseInt(shuffle[a]);
+  let shuffle = (pin).toString();
+  for (let a = 0; a < shuffle.length; a++) {
+    let p = parseInt(shuffle[a]);
     if (p > output.length) {
       p = p - output.length;
     }
@@ -94,14 +126,14 @@ function passAlgo(site,pin,length){
 
 
 function shuffleString(s,x){
-	var left = s.substring(0,x);
-	var right = s.substring(x);
+	let left = s.substring(0,x);
+	let right = s.substring(x);
 	return right + left;
 }
 
 
 function setVal(i,c,f,v){
-	var all = document.getElementsByClassName(c);
+	let all = document.getElementsByClassName(c);
 	for ( x = 0 ; x < all.length ; x++ ) {
 		all[x].className = c;
 	}
@@ -119,8 +151,8 @@ if (window.applicationCache) {
 }
 
 function populateSpecChars(){
-	for ( var i in sets[3] ){
-		var c = document.createElement("input");
+	for ( let i in sets[3] ){
+		let c = document.createElement("input");
 			c.type = "checkbox";
 			c.setAttribute("class","charOpts");
 			c.value = i;
@@ -128,7 +160,7 @@ function populateSpecChars(){
 			c.setAttribute("onclick","makePassword2020();");
 			c.id = "specChar"+i;
 		document.getElementById("specialChars").appendChild(c);
-		var l = document.createElement("label");
+		let l = document.createElement("label");
 			l.setAttribute("for","specChar"+i);
 			l.innerHTML = sets[3][i];
 		document.getElementById("specialChars").appendChild(l);
@@ -145,28 +177,92 @@ function showTab(x){
 
 function saveOptions(){
 	let settings = document.getElementById("specialChars").getElementsByTagName("input");
-	for ( var i in settings ){
+	for ( let i in settings ){
 		localStorage.setItem(settings[i].id,settings[i].checked);
 	}
 }
 function loadOptions(){
+	console.log(localStorage);
 	let settings = document.getElementById("specialChars").getElementsByTagName("input");
-	for ( var i in settings ){
+	for ( let i in settings ){
 		if ( localStorage[settings[i].id] && typeof(localStorage[settings[i].id]) != "undefined" ){
 			if ( document.getElementById(settings[i].id) && localStorage[settings[i].id] == "false" ){
 				document.getElementById(settings[i].id).checked = false
 			}
 		}
+		else {
+			alert("Saved settings not found.  Default settings will be used.  If you have previously backed up settings, please import them before use.");
+			break;
+		}
+	}
+	getSettings();
+	showTab();
+}
+
+function showTab(){
+	for ( var i in tabs ){
+		if ( i == activeTab ){
+			document.getElementById(tabs[i]).style.display = "block";
+		}
+		else {
+			document.getElementById(tabs[i]).style.display = "none";
+		}
+	}
+	let tabButtons = document.getElementById("tabs").getElementsByTagName("button");
+	for ( let i in tabButtons ){
+		if ( i == activeTab ){
+			tabButtons[i].classList.add("activeTab");
+		}
+		else {
+			tabButtons[i].classList.remove("activeTab");
+		}
 	}
 }
+
+function getSettings(){
+	let string = "";
+	let inputs = document.getElementsByTagName("input");
+	for ( let i in inputs ){
+		if ( inputs[i].id && inputs[i].id != "site" && inputs[i].id != "output" && inputs[i].id){
+			string += inputs[i].id + "="
+			if ( inputs[i].type == "checkbox" ){
+				string += inputs[i].checked;
+			}
+			else {
+				string += inputs[i].value;
+			}
+			string += ",";
+		}
+	}
+	document.getElementById("settings").value = btoa(string);
+}
+
+function importSettings(){
+	let string = atob(document.getElementById("settings").value);
+	let opts = string.split(",");
+	for ( let i in opts ){
+		let parts = opts[i].split("=");
+		if ( document.getElementById(parts[0])){
+			if ( document.getElementById(parts[0]).type == "checkbox" ){
+				document.getElementById(parts[0]).checked = ( parts[1] == "true" );
+			}
+			else {
+				document.getElementById(parts[0]).value = parts[1];
+			}
+		}
+	}
+	alert("Your settings have been restored.")
+}
+
 </script>
 <style>
 body {
 	background-color: #999;
-	font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-	color: #333333;
-	font-size: 16px;
-	line-height: 24px;
+	font-family:'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+	font-size: 0.85em;
+	line-height: 1.1em;
+	display: flex;
+	justify-content: center;
 }
 #container {
 	background-color: #eee;
@@ -176,16 +272,17 @@ body {
 	border-radius: 10px;
 	padding: 10px;
 	position: absolute;
-	left: 50%;
-	top: 1%;
-	margin-left: -177px;
 	box-shadow: #aaa 0px 0px 10px 10px;
 }
 @media only screen and (max-device-width: 400px) {
+	body {
+		background-color: #eee;
+	}
 	#container {
 		width: 96%;
 		box-shadow: none;
 		border-color: transparent;
+		margin: 0;
 	}
 }
 
@@ -206,6 +303,9 @@ body {
 	font-size: 16px;
 	margin: 8px 0;
 	border-radius: 2px;
+}
+#length, #length2 {
+	width: 20% !important;
 }
 #container #generate input[type=checkbox]{
 	display: none;
@@ -237,7 +337,7 @@ body {
 	margin: 0 4px 0 10px;
 }
 
-#container #generate button {
+#container #generate button, #import, #copy {
 	display:block;
 	width: 98%;
 	padding: 4px 10px;
@@ -246,11 +346,23 @@ body {
 	margin: 20px 1%;
 	font-size: 16px;
 	color: #000;
-	background-color: lightblue;
+	background-color:lightskyblue;
 }
-#container #generate button:active {
+#container #generate button:active, #import:active, #copy:active {
 	color: lightblue;
 	background-color: #fff;
+}
+
+#import, #copy {
+	width: 40%;
+	margin: 1em 1em;
+	display: inline-block;
+}
+
+#container #config {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
 }
 
 #container #config input[type=checkbox]{
@@ -258,17 +370,24 @@ body {
 }
 #container #config label {
 	display: inline-block;
-	width: 32px;
-	height: 32px;
+	width: 1.4em;
+	height: 1.4em;
 	background-color: #666;
 	color: #999;
-	font-size: 24px;
-	line-height: 28px;
-	margin: 2px 4px;
+	font-size: 1.7em;
+	line-height: 1.3em;
+	margin: .2em;
 	text-align: center;
-	border-radius: 2px;
+	border-radius: .2em;
 	border: 2px solid #012D38;
 }
+
+#container #config #specialChars {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
 #container #config input[type=checkbox]:checked + label {
 	background-color: lightgreen;
 	color: #000;
@@ -293,15 +412,47 @@ body {
 	margin-bottom: 0;
 }
 
+#settings {
+	width: 94%;
+	height: 6em;
+	margin: 0 2%;
+	font-size: 10px;
+}
+
+#tabs {
+	display: flex;
+}
+#tabs button {
+	width: 23%;
+	margin: 0 1%;
+	text-align: center;
+	font-size: 1em;
+	border: 2px solid #666;
+	border-radius: 6px;
+}
+
+#tabs button.activeTab {
+	background-color:lightskyblue;
+}
+
+
 </style>
 </HEAD>
 <BODY onload="populateSpecChars();loadOptions();" onunload="saveOptions();">
 	<div id="container">
 		<h1>Keymaster</h1>
 		<h5>A pseudo-random password generator.</h5>
+		<div id="tabs">
+			<button onclick="activeTab = 0;showTab();">Generate</button>
+			<button onclick="activeTab = 1;showTab();">Config</button>
+			<button onclick="activeTab = 2;showTab();">About</button>
+			<button onclick="activeTab = 3;showTab();">Backup</button>
+		</div>
 		<div id="generate">
+			<h3>Password Generation</h3>
 			<label for="length">Length</label>
-			<input type="number" size=24 id="length" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
+			<input type="number" size=3 id="length" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">&nbsp;-&nbsp;
+			<input type="number" size=3 id="length2" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
 			<br/>
 			<label for="pin">PIN Code</label>
 			<input type="number" size=24 id="pin" value="0000" onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
@@ -318,15 +469,35 @@ body {
 			<button onclick="copyField('output');">Copy to Clipboard</button>
 		</div>
 		<div id="config">
-			<hr/>
 			<h3>Special Character Set</h3>
-			<i>Click character to toggle.</i>
+			<p>Configure which special characters to use in your password.  Click a character to toggle.</p>
 			<div id="specialChars"></div>
 		</div>
 		<div id="about">
-			<hr/>
-			About Keymaster.
+			<h3>About Keymaster.</h3>
 			<p>Rather than store your passwords, Keymaster allows you to consistently generate pseudo-random passwords given a site name, pin code and password length.</p>
+			<h3>Pseudorandom?</h3>
+			<p>Passwords generated by the keymaster are not truly random.  If they were, there would be no way to regenerate them.  However, they are much more secure than using dictionary words, birthdays, or anything else typically memorable.</p>
+			<h3>How it works:</h3>
+			<ol>
+				<li>Configure your password length range.  Choose a minimum and maximum length.</li>
+				<li>Choose a pin code.  It can be any length.</li>
+				<li>Enter the name of the site you are generating a password for.</li>
+				<li>Optional: Enable/Disable special characters.</li>
+				<li>Optional: Select/Deselect the special characters you would like to include.</li>
+				<li>Copy the generated password with the "Copy to Clipboard" button.  Paste where needed.</li>
+				<li>Backup your settings in the "Backup" section.  Your settings are saved in browser storage and should not be considered permanent.</li>
+			</ol>
+			<h3>Is this secure?</h3>
+			<p>Everything is done locally in the browser on your machine.  You can even save this page to your desktop an run it locally.  In fact, I encourage you to.  Hosting sites come and go and I can't guarantee this will be hosted at this address forever.</p>
+		</div>
+		<div id="importExport">
+			<h3>Import/Export Settings</h3>
+			<p>Once your settings are selected, you can copy the below text to a secure location.  This text can be used to reset this application to it's current state.  Your state will be saved to browser storage by default, but this will allow you to use these settings on another browser or to restore if you clear your browsers storage.</p>
+			<p>Note: Any change in settings will change this text.  Make sure your settings are as you like before backing up.</p>
+			<textarea id="settings"></textarea>
+			<button id="copy" onclick="copyField('settings');alert('Settings exported to clipboard.');">Copy Settings</button>
+			<button id="import" onclick="importSettings()">Import Settings</button>
 		</div>
 	</div>
 </BODY >
