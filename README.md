@@ -9,7 +9,7 @@ A long time ago, when password managers started to become a thing I wanted to cr
 
 I eventually came to the conclusion that the passgen algorhythm was not nearly "random" enough.  That led to this current iteration.
 
-In addition to the new algorhythm, Keymaster also allows for the disabling or enabling of specific special characters in passwords and choices are saved in html5 webstorage.
+In addition to the new algorhythm, Keymaster also allows for the disabling or enabling of specific special characters in passwords and choices are saved in html5 webstorage.  You can also export your settings to a text blob that can be easily imported to ensure consistent usage.
 
 # Advanced usage:
 
