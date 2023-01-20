@@ -295,6 +295,7 @@ body {
 #container #generate label {
 	display: inline-block;
 	width: 30%;
+	font-weight: bold;
 }
 #container #generate input[type=text],
 #container #generate input[type=number] {
@@ -321,6 +322,8 @@ body {
 	padding: 4px 10px;
 	border-radius: 10px;
 	border: 2px solid #000;
+	margin-right: 1em;
+	font-weight: normal;
 }
 #container #generate input[type=checkbox]:checked + label {
 	background-color: lightgreen;
@@ -401,8 +404,8 @@ body {
 	padding: 4px 8px;
 }
 #container #generate #output {
-	background-color: transparent;
-	border-color: transparent;
+	background-color: #ddd;
+	/* border-color: transparent; */
 	color: #000;
 	font-weight: 500;
 	text-align: left;
@@ -428,11 +431,16 @@ body {
 	text-align: center;
 	font-size: 1em;
 	border: 2px solid #666;
+	color: #000;
 	border-radius: 6px;
+	background-color: skyblue;
+	padding: 0.5em;
 }
 
 #tabs button.activeTab {
-	background-color:lightskyblue;
+	background-color:black;
+	color: white;
+	border-color: black;
 }
 
 
@@ -490,9 +498,11 @@ body {
 			</ol>
 			<h3>Is this secure?</h3>
 			<p>Everything is done locally in the browser on your machine.  You can even save this page to your desktop an run it locally.  In fact, I encourage you to.  Hosting sites come and go and I can't guarantee this will be hosted at this address forever.</p>
+			<h3>Why are there 2 length fields?</h3>
+			<p>For additional security, you can allow keymaster to determine your password length.  Given an upper and lower value, keymaster will algorhythmically choose a password length within your range.  If you don't want this simply supply the same value for upper and lower.</p>
 		</div>
 		<div id="importExport">
-			<h3>Import/Export Settings</h3>
+			<h3>Import/Export</h3>
 			<p>Once your settings are selected, you can copy the below text to a secure location.  This text can be used to reset this application to it's current state.  Your state will be saved to browser storage by default, but this will allow you to use these settings on another browser or to restore if you clear your browsers storage.</p>
 			<p>Note: Any change in settings will change this text.  Make sure your settings are as you like before backing up.</p>
 			<textarea id="settings"></textarea>
