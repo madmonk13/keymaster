@@ -69,14 +69,14 @@ function makePassword2020() {
 	let length = 0;
 	let site = document.getElementById("site").value;
 	let pin = document.getElementById("pin").value;
-	if ( document.getElementById("length").value == document.getElementById("length2").value ){
-		length = document.getElementById("length").value;
+	if ( document.getElementById("len").value == document.getElementById("len2").value ){
+		length = document.getElementById("len").value;
 	}
 	else {
-		let minLength = parseInt(document.getElementById("length").value);
-		let maxLength = parseInt(document.getElementById("length2").value);
+		let minLength = parseInt(document.getElementById("len").value);
+		let maxLength = parseInt(document.getElementById("len2").value);
 		if ( maxLength < minLength ){
-			document.getElementById("length2").value = minLength;
+			document.getElementById("len2").value = minLength;
 			return;
 		}
 		else {
@@ -189,10 +189,24 @@ function saveOptions(){
 	for ( let i in settings ){
 		localStorage.setItem(settings[i].id,settings[i].checked);
 	}
+	localStorage.setItem('len',document.getElementById('len').value);
+	localStorage.setItem('len2',document.getElementById('len2').value);
+	localStorage.setItem('pin',document.getElementById('pin').value);
+	
 }
 function loadOptions(){
 	console.log(localStorage);
 	let settings = document.getElementById("specialChars").getElementsByTagName("input");
+
+	try {
+		document.getElementById('len').value = localStorage['len'];
+		document.getElementById('len2').value = localStorage['len2'];
+		document.getElementById('pin').value = localStorage['pin'];
+	}
+	catch {
+
+	}
+
 	for ( let i in settings ){
 		if ( localStorage[settings[i].id] && typeof(localStorage[settings[i].id]) != "undefined" ){
 			if ( document.getElementById(settings[i].id) && localStorage[settings[i].id] == "false" ){
@@ -323,7 +337,7 @@ body {
 	margin: 8px 0;
 	border-radius: 2px;
 }
-#length, #length2 {
+#len, #len2 {
 	width: 20% !important;
 }
 #container #generate input[type=checkbox]{
@@ -477,9 +491,9 @@ body {
 		</div>
 		<div id="generate">
 			<h3>Password Generation</h3>
-			<label for="length">Length</label>
-			<input type="number" size=3 id="length" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">&nbsp;-&nbsp;
-			<input type="number" size=3 id="length2" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
+			<label for="len">Length</label>
+			<input type="number" size=3 id="len" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">&nbsp;-&nbsp;
+			<input type="number" size=3 id="len2" value=16 onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
 			<br/>
 			<label for="pin">PIN Code</label>
 			<input type="number" size=24 id="pin" value="0000" onkeyup="this.value=this.value.replace(/[^0-9]/g,'');makePassword2020();" onchange="makePassword2020();">
