@@ -9,8 +9,8 @@ let activeTab = 0;
 
 let sets = new Array();
 sets[0] = "abcdefghijklmnopqrstuvwxyz";
-sets[1] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-sets[2] = "0123456789";
+sets[1] = "0123456789";
+sets[2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 sets[3] = "`~!@#$%^&*()-=_+[]{}|;:,./<>?'\"";
 localStorage.specChar=[];
 
@@ -21,6 +21,14 @@ function copyField(id) {
 	copyText.setSelectionRange(0, 99999); /*For mobile devices*/
 	document.execCommand("copy");
 	document.getElementById(id).classList.add("copy");  
+}
+
+function reverseString(string){
+	let output = "";
+	for ( var i = string.length; i > 0; i-- ){
+		output += string[i-1];
+	}
+	return output;
 }
 
 function swapChar(s,c,o){
@@ -214,7 +222,12 @@ function showTab(){
 			tabButtons[i].classList.add("activeTab");
 		}
 		else {
-			tabButtons[i].classList.remove("activeTab");
+			try {
+				tabButtons[i].classList.remove("activeTab");
+			}
+			catch {
+
+			}
 		}
 	}
 }
@@ -268,18 +281,21 @@ body {
 	background-color: #eee;
 	display: block;
 	width: 375px;
+	height: 600px;
 	border: 2px solid #000;
 	border-radius: 10px;
 	padding: 10px;
 	position: absolute;
 	box-shadow: #aaa 0px 0px 10px 10px;
+	overflow-y: auto;
 }
 @media only screen and (max-device-width: 400px) {
 	body {
 		background-color: #eee;
 	}
 	#container {
-		width: 96%;
+		width: 96vw;
+		height: 100vh;
 		box-shadow: none;
 		border-color: transparent;
 		margin: 0;
@@ -450,6 +466,7 @@ body {
 	<div id="container">
 		<h1>Keymaster</h1>
 		<h5>A pseudo-random password generator.</h5>
+		<hr/>
 		<div id="tabs">
 			<button onclick="activeTab = 0;showTab();">Generate</button>
 			<button onclick="activeTab = 1;showTab();">Config</button>
