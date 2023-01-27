@@ -76,7 +76,7 @@ function makePassword2020() {
 		let minLength = parseInt(document.getElementById("len").value);
 		let maxLength = parseInt(document.getElementById("len2").value);
 		if ( maxLength < minLength ){
-			document.getElementById("len2").value = minLength;
+			length = minLength;
 			return;
 		}
 		else {
