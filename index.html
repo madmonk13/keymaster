@@ -4,6 +4,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <TITLE> Keymaster </TITLE>
 <!--
+	Version 1.2, Released 2/21/2023
+	New in this version
+	-	Fixes to import routine
+	-	Localstorage now uses settings blob instead of options array
 	Version 1.1, Released 2/13/2023
 	New in this version:
 	-	Settings can now be backed up and imported via text file.
@@ -193,36 +197,18 @@ function saveOptions(){
 	for ( let i in settings ){
 		localStorage.setItem(settings[i].id,settings[i].checked);
 	}
-	localStorage.setItem('len',document.getElementById('len').value);
-	localStorage.setItem('len2',document.getElementById('len2').value);
-	localStorage.setItem('pin',document.getElementById('pin').value);
-	
+	localStorage.setItem('blob',document.getElementById('settings').value);
 }
-function loadOptions(){
-	console.log(localStorage);
+function loadOptions(silent){
 	let settings = document.getElementById("specialChars").getElementsByTagName("input");
 
 	try {
-		document.getElementById('len').value = localStorage['len'];
-		document.getElementById('len2').value = localStorage['len2'];
-		document.getElementById('pin').value = localStorage['pin'];
+		document.getElementById('settings').value = localStorage['blob'];
+		importSettings(true);
 	}
 	catch {
-
+		alert("Saved settings not found.  Default settings will be used.  If you have previously backed up settings, please import them before use.");
 	}
-
-	for ( let i in settings ){
-		if ( localStorage[settings[i].id] && typeof(localStorage[settings[i].id]) != "undefined" ){
-			if ( document.getElementById(settings[i].id) && localStorage[settings[i].id] == "false" ){
-				document.getElementById(settings[i].id).checked = false
-			}
-		}
-		else {
-			alert("Saved settings not found.  Default settings will be used.  If you have previously backed up settings, please import them before use.");
-			break;
-		}
-	}
-	getSettings();
 	showTab();
 }
 
@@ -269,21 +255,25 @@ function getSettings(){
 	document.getElementById("settings").value = btoa(string);
 }
 
-function importSettings(){
+function importSettings(silent){
 	let string = atob(document.getElementById("settings").value);
 	let opts = string.split(",");
 	for ( let i in opts ){
 		let parts = opts[i].split("=");
-		if ( document.getElementById(parts[0])){
-			if ( document.getElementById(parts[0]).type == "checkbox" ){
-				document.getElementById(parts[0]).checked = ( parts[1] == "true" );
-			}
-			else {
-				document.getElementById(parts[0]).value = parts[1];
+		if ( parts[0].length != 0 ){
+			if ( document.getElementById(parts[0])){
+				if ( document.getElementById(parts[0]).type == "checkbox" ){
+					document.getElementById(parts[0]).checked = ( parts[1] == "true" );
+				}
+				else if ( parts[0] != "backupFile" ){ // we don't want to do anything with this input on restore
+					document.getElementById(parts[0]).value = parts[1];
+				}
 			}
 		}
 	}
-	alert("Your settings have been restored.");
+	if ( silent !== true ){
+		alert("Your settings have been restored.");
+	}
 	saveOptions();
 }
 
@@ -300,16 +290,31 @@ function downloadBackup(){
 
 function importBackup(){
 	let file = document.getElementById("backupFile").files[0];
-	let fileReader = new FileReader(); 
-	fileReader.readAsText(file); 
-	fileReader.onload = function() {
-		document.getElementById("settings").value = fileReader.result;
-		importSettings();
-	}; 
-	fileReader.onerror = function() {
-		alert(fileReader.error);
-	}; 
+	let fileReader = new FileReader();
+	if ( typeof(file) == "object" ){
+		fileReader.readAsText(file); 
+		fileReader.onload = function() {
+			document.getElementById("settings").value = fileReader.result;
+			importSettings();
+		}; 
+		fileReader.onerror = function() {
+			alert(fileReader.error);
+		}; 
+	}
 }
+
+function init(){
+	populateSpecChars();
+	loadOptions();
+	// listen for backup file
+	document.getElementById('backupFile').addEventListener('change', function(e) {
+	if (e.target.files[0]) {
+		importBackup();
+	}
+	});
+}
+
+
 </script>
 <style>
 body {
@@ -511,7 +516,7 @@ body {
 
 </style>
 </HEAD>
-<BODY onload="populateSpecChars();loadOptions();" onunload="saveOptions();">
+<BODY onload="init();" onunload="saveOptions();">
 	<div id="container">
 		<h1>Keymaster</h1>
 		<h5>A pseudo-random password generator.</h5>
@@ -542,6 +547,11 @@ body {
 			<br/>
 			<button onclick="copyField('output');">Copy to Clipboard</button>
 			<br/>
+			New in version 1.2
+			<ul>
+				<li>Fixes to import routine</li>
+				<li>Localstorage now uses settings blob instead of options array</li>
+			</ul>
 			New in version 1.1
 			<ul>
 				<li>Settings can now be downloaded and imported as a text file.  See "Backup" section.</li>
